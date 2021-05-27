@@ -73,8 +73,8 @@ main:
 #  EXAMPLES
 # ============================================================================ #
 
-example-queens: N := 8
-example-queens:
+example/queens: N := 8
+example/queens:
   # Build
 	@mkdir -p build/
 	@cd build/ && cmake -D CMAKE_BUILD_TYPE=Release ..
@@ -84,4 +84,18 @@ example-queens:
   # Run
 	@echo ""
 	@./build/example/queens ${N} ${M}
+	@echo ""
+
+
+example/knights_tour: N := 5
+example/knights_tour:
+  # Build
+	@mkdir -p build/
+	@cd build/ && cmake -D CMAKE_BUILD_TYPE=Release ..
+
+	@cd build/ && make $(MAKE_FLAGS) knights_tour
+
+  # Run
+	@echo ""
+	@./build/example/knights_tour ${N} ${M}
 	@echo ""

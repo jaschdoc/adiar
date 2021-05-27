@@ -100,10 +100,10 @@ can be varied with the following two Makefile variables
 - `N`: The _N_ to be used in the problem.
 - `M`: The amount of memory given to Adiar in MiB (default: 1024).
 
-| target                         | Example                                                             |
-|--------------------------------|---------------------------------------------------------------------|
-| `example-queens`               | _N_-Queens board creation, counting and enumerating solutions       |
-
+| target                 | Example                                                        |
+|------------------------+----------------------------------------------------------------|
+| `example/queens`       | _N_-Queens board creation, counting and enumerating solutions  |
+| `example/knights-tour` | Counting the number of knight's Tours on a _N_x_N_ sized board |
 
 ## Contributions
 Adiar is not yet feature complete, and there are still many interesting things
