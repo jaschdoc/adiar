@@ -21,7 +21,7 @@ available to _Adiar_. The default is 1024 MiB.
 
 **Files:** `queens.cpp`
 
-**Target:** `make example-queens N=<?>`
+**Target:** `make example/queens N=<?>`
 
 Solve the N-Queens problem for _N = `?`_ (default: `8`). This is done by
 constructing an BDD row-by-row that represents whether the row is in a legal
@@ -38,6 +38,19 @@ procedure and the enumeration procedure.
 shortcomings for BDDs trying to solve the N-Queens problem. At around _N_ = 14
 the intermediate sizes explodes a lot. One can with about 100 GB of disk space
 or memory compute it.
+
+## Knight's Tours
+
+**Files:** `knights_tour_bryant.cpp**
+
+**Target:** `make example/knights_tour/<?> N=<?>`
+
+Counts the number of Knight's Tours on an _N = `?`_ sized square board. Either
+_all_ or only the _closed_ tours are counted. This is done by combining ZDDs
+that describe the possible transitions at every time step together with ZDDs
+that make every square visited only once. If only the _closed_ tours are
+supposed to be used, then the first time-step is fixed to the top-left corner
+and the next and last time-step fixed to the two possible moves by a Knight.
 
 ## References
 
