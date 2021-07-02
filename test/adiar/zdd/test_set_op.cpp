@@ -1320,5 +1320,163 @@ go_bandit([]() {
                 AssertThat(meta.can_pull(), Is().False());
               });
           });
+
+        describe("zdd_complement", [&]() {
+            // Edge cases
+                                     // TODO
+            it("computes { ? }' in { ? }", [&]() {
+
+              });
+
+            // General cases
+            it("computes { {3}, {2,4}, {3,4} }' in { 0, 1, 2, 3, 4, 5, 6 }", [&]() {
+                /*
+                              ---- x0 , x1
+
+                      1       ---- x2
+                     / \
+                     2 |      ---- x3
+                    / \|
+                    T  3      ---- x4
+                      / \
+                      F T     ---- x5 , x6
+                */
+                label_file dom;
+                { label_writer lw(dom);
+                  lw << 0 << 1 << 2 << 3 << 4 << 5 << 6;
+                }
+
+                node_file in;
+
+                { // Garbage collect writers early
+                  node_writer nw(in);
+                  nw << create_node(4,MAX_ID, sink_F, sink_T)
+                     << create_node(3,MAX_ID, sink_T, create_node_ptr(4,MAX_ID))
+                     << create_node(2,MAX_ID, create_node_ptr(3, MAX_ID), create_node_ptr(4,MAX_ID))
+                    ;
+                }
+
+                __zdd out = zdd_complement(in, dom);
+
+                node_arc_test_stream node_arcs(out);
+
+                // Precursor
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { create_node_ptr(0,0), create_node_ptr(1,0) }));
+
+                // Don't care chain
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(0,0)), create_node_ptr(1,MAX_ID) }));
+
+                // (1)
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { create_node_ptr(1,0), create_node_ptr(2,0) }));
+
+                // Don't care chain
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(1,0)), create_node_ptr(2,MAX_ID) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { create_node_ptr(1,MAX_ID), create_node_ptr(2,MAX_ID) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(1,MAX_ID)), create_node_ptr(2,MAX_ID) }));
+
+                // (*) New node between (1) and (3)
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(2,0)), create_node_ptr(3,0) }));
+
+                // (2)
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { create_node_ptr(2,0), create_node_ptr(3,1) }));
+
+                // Don't care chain
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { create_node_ptr(2,MAX_ID), create_node_ptr(3,MAX_ID) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(2,MAX_ID)), create_node_ptr(3,MAX_ID) }));
+
+                // (3)
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { create_node_ptr(3,0), create_node_ptr(4,0) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(3,1)), create_node_ptr(4,0) }));
+
+                // At-least-one chain
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { create_node_ptr(3,1), create_node_ptr(4,MAX_ID-1) }));
+
+                // Don't care chain
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(3,0)), create_node_ptr(4,MAX_ID) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { create_node_ptr(3,MAX_ID), create_node_ptr(4,MAX_ID) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(3,MAX_ID)), create_node_ptr(4,MAX_ID) }));
+
+                // At-least-one chain
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(4,0)), create_node_ptr(5,MAX_ID-1) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(4,MAX_ID-1)), create_node_ptr(5,MAX_ID-1) }));
+
+                // Don't care chain
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { create_node_ptr(4,0), create_node_ptr(5,MAX_ID) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(4,MAX_ID-1)), create_node_ptr(5,MAX_ID) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(4,MAX_ID)), create_node_ptr(5,MAX_ID) }));
+
+                // At-least-one chain
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(5,MAX_ID-1)), create_node_ptr(6,MAX_ID-1) }));
+
+                // Don't care chain
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(5,MAX_ID-1)), create_node_ptr(6,MAX_ID) }));
+                AssertThat(node_arcs.can_pull(), Is().True());
+                AssertThat(node_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(5,MAX_ID)), create_node_ptr(6,MAX_ID) }));
+
+                AssertThat(node_arcs.can_pull(), Is().False());
+
+                sink_arc_test_stream sink_arcs(out);
+
+                AssertThat(sink_arcs.can_pull(), Is().True());
+                AssertThat(sink_arcs.pull(), Is().EqualTo(arc { create_node_ptr(6,MAX_ID-1), sink_F }));
+                AssertThat(sink_arcs.can_pull(), Is().True());
+                AssertThat(sink_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(6,MAX_ID-1)), sink_T }));
+
+                AssertThat(sink_arcs.can_pull(), Is().True());
+                AssertThat(sink_arcs.pull(), Is().EqualTo(arc { create_node_ptr(6,MAX_ID), sink_T }));
+                AssertThat(sink_arcs.can_pull(), Is().True());
+                AssertThat(sink_arcs.pull(), Is().EqualTo(arc { flag(create_node_ptr(6,MAX_ID)), sink_T }));
+
+                AssertThat(sink_arcs.can_pull(), Is().False());
+
+                meta_test_stream<arc_t, ARC_FILE_COUNT> meta(out);
+
+                AssertThat(meta.can_pull(), Is().True());
+                AssertThat(meta.pull(), Is().EqualTo(create_meta(0,1u)));
+
+                AssertThat(meta.can_pull(), Is().True());
+                AssertThat(meta.pull(), Is().EqualTo(create_meta(1,2u)));
+
+                AssertThat(meta.can_pull(), Is().True());
+                AssertThat(meta.pull(), Is().EqualTo(create_meta(2,2u)));
+
+                AssertThat(meta.can_pull(), Is().True());
+                AssertThat(meta.pull(), Is().EqualTo(create_meta(3,3u)));
+
+                AssertThat(meta.can_pull(), Is().True());
+                AssertThat(meta.pull(), Is().EqualTo(create_meta(4,3u)));
+
+                AssertThat(meta.can_pull(), Is().True());
+                AssertThat(meta.pull(), Is().EqualTo(create_meta(5,2u)));
+
+                AssertThat(meta.can_pull(), Is().True());
+                AssertThat(meta.pull(), Is().EqualTo(create_meta(6,2u)));
+
+                AssertThat(meta.can_pull(), Is().False());
+              });
+          });
       });
   });

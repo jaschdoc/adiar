@@ -36,6 +36,16 @@ namespace adiar
   /// between their family of sets.
   //////////////////////////////////////////////////////////////////////////////
   __zdd zdd_diff(const zdd &zdd_1, const zdd &zdd_2);
+
+  //////////////////////////////////////////////////////////////////////////////
+  /// \brief Given a ZDD for a Family F and a domain D (label_file), computes
+  /// the complement of F within D faster than computing
+  /// `zdd_diff(zdd_powerset(D), S)``.
+  ///
+  /// The label_file is expected to be given in-order.
+  //////////////////////////////////////////////////////////////////////////////
+  __zdd zdd_complement(const zdd &dd, const label_file &dom);
+
 }
 
 #endif // ADIAR_ZDD_SET_OP_H

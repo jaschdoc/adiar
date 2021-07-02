@@ -371,7 +371,7 @@ namespace adiar {
       adiar_debug(!can_pull(),
                  "Level should be emptied before moving on");
 
-      adiar_debug(has_next_level(),
+      adiar_debug(has_next_level() || has_stop_label,
                  "Has no next level to go to");
 
       if constexpr (Buckets == 0) {
@@ -412,7 +412,7 @@ namespace adiar {
           && (!has_stop_label || stop_label != front_bucket_label())) {
         adiar_debug(!has_stop_label || _label_comparator(front_bucket_label(), stop_label),
                     "stop label should be strictly ahead of current level");
-        adiar_debug(!_overflow_queue.empty(),
+        adiar_debug(!_overflow_queue.empty(), // TODO: All fine, if we have a stop_label?
                     "'has_next_level()' implied non-empty queue, all buckets turned out to be empty, yet overflow queue is also.");
 
         label_t pq_label = LabelExt::label_of(_overflow_queue.top());
